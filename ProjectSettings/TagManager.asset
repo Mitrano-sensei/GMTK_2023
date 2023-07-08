@@ -8,13 +8,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - rectangleGirl
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - groundAll
+  - groundBoyOnly
+  - groundGirlOnly
+  - superBoi
   - 
   - 
   - 
@@ -40,4 +40,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Players
+    uniqueID: 2927559895
     locked: 0
