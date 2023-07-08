@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace TarodevController {
     /// <summary>
@@ -21,6 +22,7 @@ namespace TarodevController {
         public Vector3 RawMovement { get; private set; }
         public bool Grounded => _colDown;
         [SerializeField] private PlayerCharacter _whoAmI;
+        [SerializeField] private Animator _animator;
 
         public PlayerCharacter WhoAmI { get { return _whoAmI; } }
 
@@ -48,15 +50,33 @@ namespace TarodevController {
             CalculateJump(); // Possibly overrides vertical
 
             MoveCharacter(); // Actually perform the axis movement
-            if (Grounded && _currentHorizontalSpeed != 0)
+            if (_currentHorizontalSpeed != 0)
             {
                 var dir = _currentHorizontalSpeed < 0 ? 1 : -1;
-                var v = _dust.velocityOverLifetime;
-                v.xMultiplier = dir;
-                PlayDust();
+                //var v = _dust.velocityOverLifetime;
+                //v.xMultiplier = dir;
+                if (Grounded)
+                    PlayDust();
+                var angle = dir < 0 ? 0 : 180;
+
+                if (angle == 180 && transform.rotation.eulerAngles.y == 0 || angle == 0 && transform.rotation.eulerAngles.y == 180 )
+                    transform.Rotate(new Vector3(0, 1, 0), 180);
+
             }
             else
                 _dust.Stop();
+
+            if (_animator != null) // TO DELETE
+            {
+                _animator.SetFloat("Speed", Math.Abs(_currentHorizontalSpeed));
+                _animator.SetBool("isGrounded", Grounded);
+
+                var randomNumber = UnityEngine.Random.Range(0, 10000);
+                if (randomNumber == 1)
+                {
+                    _animator.SetTrigger("faire_un_doigt");
+                }
+            }
         }
 
 
