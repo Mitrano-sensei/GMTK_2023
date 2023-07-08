@@ -48,6 +48,12 @@ public class RecorderManager : MonoBehaviour
         throw new Exception("Should not happen");
     }
 
+    internal void ReplayAll()
+    {
+        _superBoiRecording.ResetFrame();
+        _superGirlRecording.ResetFrame();
+    }
+
     public class Recording
     {
         private PlayerController.PlayerCharacter _character;

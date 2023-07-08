@@ -22,6 +22,9 @@ namespace TarodevController {
         public bool Grounded => _colDown;
         [SerializeField] private PlayerCharacter _whoAmI;
 
+        public PlayerCharacter WhoAmI { get { return _whoAmI; } }
+
+
         private Vector3 _lastPosition;
         private float _currentHorizontalSpeed, _currentVerticalSpeed;
 
@@ -70,18 +73,16 @@ namespace TarodevController {
                 }
 
                 // Record input
-                recordManager.GetRecord(_whoAmI).RecordInput(Input);
+                recordManager.GetRecord(WhoAmI).RecordInput(Input);
             }
             else if (IShouldReplay(gameManager.CurrentGameState))
             {
                 // Else replay from recording ONLY IF Win or SuperGirlTurn
 
-                if (recordManager.GetRecord(_whoAmI).IsFinished())
-                {
+                if (recordManager.GetRecord(WhoAmI).IsFinished())
                     return;
-                }
 
-                Input = recordManager.GetRecord(_whoAmI).ReadInput();
+                Input = recordManager.GetRecord(WhoAmI).ReadInput();
                 if (Input.JumpDown)
                 {
                     _lastJumpPressed = Time.time;
@@ -95,7 +96,7 @@ namespace TarodevController {
         private bool IShouldReplay(GameManager.GameState currentGameState)
         {
             var everyoneShouldReplay = currentGameState == GameManager.GameState.Win;
-            var superGirlShouldReplay = _whoAmI == PlayerCharacter.SuperRectangleGirl && currentGameState == GameManager.GameState.SuperCapsuleBoyTurn;
+            var superGirlShouldReplay = WhoAmI == PlayerCharacter.SuperRectangleGirl && currentGameState == GameManager.GameState.SuperCapsuleBoyTurn;
             var superBoiShouldReplayAlone = false;
 
             return everyoneShouldReplay || superGirlShouldReplay || superBoiShouldReplayAlone;
@@ -104,9 +105,9 @@ namespace TarodevController {
 
         private bool IAmPlaying(GameManager.GameState currentGameState)
         {
-            return (_whoAmI == PlayerCharacter.SuperRectangleGirl && currentGameState == GameManager.GameState.SuperRectangleGirlTurn)
+            return (WhoAmI == PlayerCharacter.SuperRectangleGirl && currentGameState == GameManager.GameState.SuperRectangleGirlTurn)
                         ||
-                    (_whoAmI == PlayerCharacter.SuperCapsuleBoy && currentGameState == GameManager.GameState.SuperCapsuleBoyTurn);
+                    (WhoAmI == PlayerCharacter.SuperCapsuleBoy && currentGameState == GameManager.GameState.SuperCapsuleBoyTurn);
         }
 
         public enum PlayerCharacter
@@ -370,6 +371,23 @@ namespace TarodevController {
                 }
             }
             return collider;
+        }
+
+        internal void UnFreeze()
+        {
+            _active = true;
+        }
+
+        internal void Freeze()
+        {
+            _active = false;
+        }
+
+        internal void ResetVelocity()
+        {
+            _currentHorizontalSpeed = 0;
+            _currentVerticalSpeed = 0;
+            _lastPosition = transform.position;
         }
 
         #endregion

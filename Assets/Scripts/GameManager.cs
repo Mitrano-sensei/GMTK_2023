@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -15,7 +16,10 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private GameState _currentGameState;
-    
+
+    [SerializeField] private Transform _pos1;
+    [SerializeField] private Transform _pos2;
+
     public delegate void ResetButtonPressed(Vector3 superBoyPosition, Vector3 superGirlPosition);
     public delegate void ResetAllButtonPressed(Vector3 superBoyPosition, Vector3 superGirlPosition);
 
@@ -45,24 +49,22 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         var gameInput = GameInput.Instance;
-        var pos1 = new Vector3(-8.77f, 2.45f, 0f);
-        var pos2 = new Vector3(-8.68f, -2.66f, 0f);
 
         if (gameInput.GetResetButtonPressed())
         {
             //resetButtonPressed?.Invoke(_currentLevel.superBoyInitialPos, _currentLevel.superGirlInitialPos);
-            resetButtonPressed?.Invoke(pos1, pos2);
+            resetButtonPressed?.Invoke(_pos1.localPosition, _pos2.localPosition);
         }   
         else if (gameInput.GetResetAllButtonPressed())
         {   
             //resetAllButtonPressed?.Invoke(_currentLevel.superBoyInitialPos, _currentLevel.superGirlInitialPos);
-            resetAllButtonPressed?.Invoke(pos1, pos2);
+            resetAllButtonPressed?.Invoke(_pos1.localPosition, _pos2.localPosition);
 
             updateGameState(GameState.SuperRectangleGirlTurn);
         } else if (gameInput.GetChangeCharacterButtonPressed() && CurrentGameState == GameState.SuperRectangleGirlTurn)
         {   
             updateGameState(GameState.SuperCapsuleBoyTurn);
-            PlayerManager.Instance.ResetPosition(pos1, pos2);
+            PlayerManager.Instance.ResetPosition(_pos1.localPosition, _pos2.localPosition);
         } else if (gameInput.GetChangeCharacterButtonPressed() && CurrentGameState == GameState.SuperCapsuleBoyTurn)
         {
             //resetAllButtonPressed?.Invoke(_currentLevel.superBoyInitialPos, _currentLevel.superGirlInitialPos);
@@ -71,14 +73,24 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void Win()
+    public async void Win()
     {
+        PlayerManager.Instance.FreezePlayers();
+
+        await Task.Delay(1000);
+
+        PlayerManager.Instance.ResetPosition(_pos1.localPosition, _pos2.localPosition);
+        PlayerManager.Instance.ResetVelocity();
+        PlayerManager.Instance.UnFreezePlayers();
+
+        RecorderManager.Instance.ReplayAll();
         updateGameState(GameState.Win);
     }
 
     public void Lose()
     {
-        updateGameState(GameState.Lose);
+        resetButtonPressed?.Invoke(_pos1.localPosition, _pos2.localPosition);
+        // updateGameState(GameState.Lose);
     }
 
 
@@ -102,11 +114,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    internal void WaitForAction()
+    {
+        updateGameState(GameState.WaitForAction);
+    }
+
     public enum GameState
     {
         SuperRectangleGirlTurn,
         SuperCapsuleBoyTurn,
         Win,
+        WaitForAction,
         Lose
     }
 }
