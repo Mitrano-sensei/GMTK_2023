@@ -52,12 +52,10 @@ public class GameManager : MonoBehaviour
 
         if (gameInput.GetResetButtonPressed())
         {
-            //resetButtonPressed?.Invoke(_currentLevel.superBoyInitialPos, _currentLevel.superGirlInitialPos);
             resetButtonPressed?.Invoke(_pos1.localPosition, _pos2.localPosition);
         }   
         else if (gameInput.GetResetAllButtonPressed())
         {   
-            //resetAllButtonPressed?.Invoke(_currentLevel.superBoyInitialPos, _currentLevel.superGirlInitialPos);
             resetAllButtonPressed?.Invoke(_pos1.localPosition, _pos2.localPosition);
 
             updateGameState(GameState.SuperRectangleGirlTurn);
@@ -67,7 +65,8 @@ public class GameManager : MonoBehaviour
             PlayerManager.Instance.ResetPosition(_pos1.localPosition, _pos2.localPosition);
         } else if (gameInput.GetChangeCharacterButtonPressed() && CurrentGameState == GameState.SuperCapsuleBoyTurn)
         {
-            //resetAllButtonPressed?.Invoke(_currentLevel.superBoyInitialPos, _currentLevel.superGirlInitialPos);
+            // Nothing happens
+
         }
 
 
@@ -98,20 +97,6 @@ public class GameManager : MonoBehaviour
     {
         var oldState = CurrentGameState;
         CurrentGameState = newGameState;
-
-        switch (newGameState)
-        {
-            case GameState.SuperRectangleGirlTurn:
-                break;
-            case GameState.SuperCapsuleBoyTurn:
-                break;
-            case GameState.Win:
-                break;
-            case GameState.Lose:
-                break;
-            default:
-                break;
-        }
     }
 
     internal void WaitForAction()

@@ -48,6 +48,15 @@ namespace TarodevController {
             CalculateJump(); // Possibly overrides vertical
 
             MoveCharacter(); // Actually perform the axis movement
+            if (Grounded && _currentHorizontalSpeed != 0)
+            {
+                var dir = _currentHorizontalSpeed < 0 ? 1 : -1;
+                var v = _dust.velocityOverLifetime;
+                v.xMultiplier = dir;
+                PlayDust();
+            }
+            else
+                _dust.Stop();
         }
 
 
@@ -388,6 +397,16 @@ namespace TarodevController {
             _currentHorizontalSpeed = 0;
             _currentVerticalSpeed = 0;
             _lastPosition = transform.position;
+        }
+
+        #endregion
+
+        #region Animation
+        [SerializeField] private ParticleSystem _dust;
+
+        public void PlayDust()
+        {
+            _dust.Play();
         }
 
         #endregion
