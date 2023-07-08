@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,21 +31,36 @@ public class GameInput : MonoBehaviour
         GetMovementVectorNormalized();
     }
 
-    public Vector2 GetMovementVectorNormalized()
+    internal Vector2 GetMovementVectorNormalized()
     {
         Vector2 inputVector = playerInputActions.Player.Move.ReadValue<Vector2>();
         return inputVector.normalized;
     }
 
-    public bool GetJumpDown()
+    internal bool GetJumpDown()
     {
         return playerInputActions.Player.Jump.triggered;
     }
 
-    public bool GetJumpUp()
+    internal bool GetJumpUp()
     {
         return playerInputActions.Player.Jump.WasReleasedThisFrame();
 
 
+    }
+
+    internal bool GetResetButtonPressed()
+    {
+        return playerInputActions.Player.Reset.triggered;
+    }
+
+    internal bool GetResetAllButtonPressed()
+    {
+        return playerInputActions.Player.ResetAll.triggered;
+    }
+
+    internal bool GetChangeCharacterButtonPressed()
+    {
+        return playerInputActions.Player.ChangeCharacter.triggered;
     }
 }

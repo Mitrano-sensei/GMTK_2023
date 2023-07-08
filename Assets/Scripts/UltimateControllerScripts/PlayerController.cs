@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -19,6 +20,7 @@ namespace TarodevController {
         public bool LandingThisFrame { get; private set; }
         public Vector3 RawMovement { get; private set; }
         public bool Grounded => _colDown;
+        [SerializeField] private PlayerCharacter _whoAmI;
 
         private Vector3 _lastPosition;
         private float _currentHorizontalSpeed, _currentVerticalSpeed;
@@ -50,14 +52,67 @@ namespace TarodevController {
 
         private void GatherInput() {
             var gameInput = GameInput.Instance;
-            Input = new FrameInput {
-                JumpDown = gameInput.GetJumpDown(),
-                JumpUp = gameInput.GetJumpUp(),
-                X = gameInput.GetMovementVectorNormalized().x
-            };
-            if (Input.JumpDown) {
-                _lastJumpPressed = Time.time;
+            var gameManager = GameManager.Instance;
+            var recordManager = RecorderManager.Instance;
+
+            if (IAmPlaying(gameManager.CurrentGameState))
+            {
+                // if manual mode, read input from game
+                Input = new FrameInput
+                {
+                    JumpDown = gameInput.GetJumpDown(),
+                    JumpUp = gameInput.GetJumpUp(),
+                    X = gameInput.GetMovementVectorNormalized().x
+                };
+                if (Input.JumpDown)
+                {
+                    _lastJumpPressed = Time.time;
+                }
+
+                // Record input
+                recordManager.GetRecord(_whoAmI).RecordInput(Input);
             }
+            else if (IShouldReplay(gameManager.CurrentGameState))
+            {
+                // Else replay from recording ONLY IF Win or SuperGirlTurn
+
+                if (recordManager.GetRecord(_whoAmI).IsFinished())
+                {
+                    return;
+                }
+
+                Input = recordManager.GetRecord(_whoAmI).ReadInput();
+                if (Input.JumpDown)
+                {
+                    _lastJumpPressed = Time.time;
+                }
+            }
+         
+
+
+        }
+
+        private bool IShouldReplay(GameManager.GameState currentGameState)
+        {
+            var everyoneShouldReplay = currentGameState == GameManager.GameState.Win;
+            var superGirlShouldReplay = _whoAmI == PlayerCharacter.SuperRectangleGirl && currentGameState == GameManager.GameState.SuperCapsuleBoyTurn;
+            var superBoiShouldReplayAlone = false;
+
+            return everyoneShouldReplay || superGirlShouldReplay || superBoiShouldReplayAlone;
+                
+        }
+
+        private bool IAmPlaying(GameManager.GameState currentGameState)
+        {
+            return (_whoAmI == PlayerCharacter.SuperRectangleGirl && currentGameState == GameManager.GameState.SuperRectangleGirlTurn)
+                        ||
+                    (_whoAmI == PlayerCharacter.SuperCapsuleBoy && currentGameState == GameManager.GameState.SuperCapsuleBoyTurn);
+        }
+
+        public enum PlayerCharacter
+        {
+            SuperRectangleGirl,
+            SuperCapsuleBoy
         }
 
         #endregion
@@ -150,7 +205,6 @@ namespace TarodevController {
         }
 
         #endregion
-
 
         #region Walk
 
