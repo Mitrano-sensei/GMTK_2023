@@ -1,16 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using TarodevController;
 using Unity.VisualScripting;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class EndZone : MonoBehaviour
 {
+    private static EndZone _instance;
+    public static EndZone Instance { get => _instance; }
+
+
     private Collider2D _collider;
 
     void Start()
     {
+        _instance = this;
+
         _collider = this.GetComponent<Collider2D>();
         if (_collider == null) 
             _collider = this.AddComponent<BoxCollider2D>();
@@ -37,5 +43,13 @@ public class EndZone : MonoBehaviour
         {
             gameManager.WaitForAction();
         }
+    }
+
+    [SerializeField] private string _nextLevel;
+
+
+    public void loadNextLevel()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(_nextLevel);
     }
 }

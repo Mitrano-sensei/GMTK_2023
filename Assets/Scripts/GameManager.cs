@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,8 +23,10 @@ public class GameManager : MonoBehaviour
 
     public delegate void ResetButtonPressed(Vector3 superBoyPosition, Vector3 superGirlPosition);
     public delegate void ResetAllButtonPressed(Vector3 superBoyPosition, Vector3 superGirlPosition);
+    public delegate void SwitchCharacter();
 
     public event ResetButtonPressed resetButtonPressed;
+    public event SwitchCharacter switchCharacter;
     public event ResetAllButtonPressed resetAllButtonPressed;
 
     // private Level _currentLevel;
@@ -43,6 +46,7 @@ public class GameManager : MonoBehaviour
         CurrentGameState = GameState.SuperRectangleGirlTurn;
         resetAllButtonPressed += (Vector3 p1, Vector3 p2) => updateGameState(GameState.SuperRectangleGirlTurn);
         // _currentLevel = LevelManager.Instance.CurrentLevel;
+        resetAllButtonPressed?.Invoke(_pos1.localPosition, _pos2.localPosition);
     }
 
     // Update is called once per frame
@@ -62,11 +66,15 @@ public class GameManager : MonoBehaviour
         } else if (gameInput.GetChangeCharacterButtonPressed() && CurrentGameState == GameState.SuperRectangleGirlTurn)
         {   
             updateGameState(GameState.SuperCapsuleBoyTurn);
+            switchCharacter?.Invoke();
             PlayerManager.Instance.ResetPosition(_pos1.localPosition, _pos2.localPosition);
         } else if (gameInput.GetChangeCharacterButtonPressed() && CurrentGameState == GameState.SuperCapsuleBoyTurn)
         {
             // Nothing happens
 
+        } else if (gameInput.GetJumpDown() && CurrentGameState == GameState.WaitForAction)
+        {
+            EndZone.Instance.loadNextLevel();
         }
 
 
@@ -74,7 +82,7 @@ public class GameManager : MonoBehaviour
 
     public async void Win()
     {
-        PlayerManager.Instance.FreezePlayers();
+        /*PlayerManager.Instance.FreezePlayers();
 
         await Task.Delay(1000);
 
@@ -84,6 +92,9 @@ public class GameManager : MonoBehaviour
 
         RecorderManager.Instance.ReplayAll();
         updateGameState(GameState.Win);
+        */
+        await Task.Delay(1000);
+        WaitForAction();
     }
 
     public void Lose()
@@ -99,9 +110,11 @@ public class GameManager : MonoBehaviour
         CurrentGameState = newGameState;
     }
 
+    [SerializeField] private Canvas _menuCanvas;
     internal void WaitForAction()
     {
         updateGameState(GameState.WaitForAction);
+        _menuCanvas.gameObject.SetActive(true);
     }
 
     public enum GameState
